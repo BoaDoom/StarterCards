@@ -74,7 +74,8 @@
     <Compile Include="Assets\Scripts\New Folder\DebugChangeCard.cs" />
     <Compile Include="Assets\Scripts\New Folder\Deck.cs" />
     <Compile Include="Assets\Scripts\New Folder\DeckView.cs" />
-    <Compile Include="Assets\Scripts\New Folder\PlayerDeck.cs" />
+    <Compile Include="Assets\Scripts\New Folder\PlayerDeck1.cs" />
+    <Compile Include="Assets\Scripts\PlayerDeckHandler.cs" />
     <Compile Include="Assets\Scripts\healthBar\DebugDamage.cs" />
     <Compile Include="Assets\Scripts\healthBar\HealthBar.cs" />
     <Compile Include="Assets\Scripts\healthBar\HealthBarMovement.cs" />
