@@ -6,7 +6,7 @@ public class DebugDamage : MonoBehaviour
     HealthBar healthBar;
     HealthBarMovement healthBarMovement;
 
-    PlayerDeck playerDeck;
+    //PlayerDeck playerDeck;
 
     public GameObject HPbar;
     public GameObject playerOneDeck;
@@ -15,7 +15,7 @@ public class DebugDamage : MonoBehaviour
     {
         healthBar = HPbar.GetComponent<HealthBar>();
         healthBarMovement = HPbar.GetComponent<HealthBarMovement>();
-        playerDeck = playerOneDeck.GetComponent<PlayerDeck>();
+        //playerDeck = playerOneDeck.GetComponent<PlayerDeck>();
     }
 
     void OnGUI()
@@ -34,12 +34,12 @@ public class DebugDamage : MonoBehaviour
 
         if (GUI.Button(new Rect(10, 40, 100, 28), "next card"))
         {
-            playerDeck.cardIndex++;
-            if (playerDeck.cardIndex > playerDeck.faces.Length-1)
-            {
-                playerDeck.cardIndex = 0;
-            }
-            playerDeck.nextCard();
+            //playerDeck.cardIndex++;
+            //if (playerDeck.cardIndex > playerDeck.faces.Length-1)
+            //{
+           //     playerDeck.cardIndex = 0;
+            //}
+            //playerDeck.nextCard();
 
         }
     }
