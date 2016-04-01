@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(BaseBodyPart))]
 public class BaseCard : MonoBehaviour {
     SpriteRenderer spriteRenderer;
 
@@ -33,6 +32,8 @@ public class BaseCard : MonoBehaviour {
             faceOfCard = false;
         }
     }
+
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();

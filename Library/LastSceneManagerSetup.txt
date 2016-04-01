@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/CardsProjectME2.unity
+- path: Assets/CardsProjectFresh3.unity
   isLoaded: 1
   isActive: 1

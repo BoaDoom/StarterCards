@@ -10,7 +10,7 @@ public class DebugMakePlayerDeck : MonoBehaviour {
     {
         if (GUI.Button(new Rect(10, 40, 100, 28), "show hand"))
         {
-            playerDeckScript.showHand();
+            playerDeckScript.dealHand();
         }
         if (GUI.Button(new Rect(110, 40, 100, 28), "add set 1"))
         {

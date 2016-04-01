@@ -9,6 +9,7 @@ public class PlayerDeckScript : MonoBehaviour {
     List<BaseCard> discardPile;
 
     float interations = 0;
+    public Vector3 playerStack = new Vector3(0.3f, 0.0f, 0.0f);
 
     private static System.Random rand = new System.Random();
     int handLimit = 5;
@@ -19,15 +20,15 @@ public class PlayerDeckScript : MonoBehaviour {
     }
     public void takeSetOfCards(List<BaseCard> setOfCards)
     {
-        int i = 0;
+        //int i = 0;
         foreach (BaseCard card in setOfCards)
         {
-            card.transform.Translate((0.3f * i)+ interations, 0.0f, 0.0f);
-            card.GetComponent<SpriteRenderer>().sortingOrder = deck.Count;
+            //
+            card.GetComponent<SpriteRenderer>().sortingOrder = deck.Count;  //setting sprite overlap/soring order
             deck.Add(card);
-            i++;
+            card.transform.Translate(playerStack);  //location moving
+            //i++;
         }
-        interations += 2;
     }
 
     public void dealHand()
@@ -35,10 +36,15 @@ public class PlayerDeckScript : MonoBehaviour {
         int i = 0;
         while (i < handLimit)
         {
-            i++;
             int randomInt = rand.Next(0, deck.Count);
             cardsInPlay.Add(deck[randomInt]);
+
+            cardsInPlay[i].transform.position = new Vector3(200+(15.0f * i), 50.0f, 0.0f);  //location moving
+            cardsInPlay[i].GetComponent<SpriteRenderer>().sortingOrder = cardsInPlay.Count;  //setting sprite overlap/soring order
+            cardsInPlay[i].TurnOverCard();
+
             deck.RemoveAt(randomInt);
+            i++;
         }
     }
 
@@ -56,5 +62,6 @@ public class PlayerDeckScript : MonoBehaviour {
     void Awake()
     {
         deck = new List<BaseCard>();
+        cardsInPlay = new List<BaseCard>();
     }
 }

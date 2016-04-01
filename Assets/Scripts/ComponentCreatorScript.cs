@@ -4,9 +4,12 @@ using System.Collections.Generic;
 
 public class ComponentCreatorScript : MonoBehaviour {
 
-    public PlayerDeckScript Player1Deck;
     public Sprite[] allCardFaces;
-    public BaseCard prefabCard = new BaseCard();
+    public PlayerDeckScript Player1Deck;
+    public BaseCard prefabCard;
+
+    public GameObject positioner;
+    public Vector3 deckLocation;
 
     public void takeComponentCode(int code)
     {
@@ -33,8 +36,13 @@ public class ComponentCreatorScript : MonoBehaviour {
         {
             tempSetOfCards.Add(Instantiate(prefabCard));
             tempSetOfCards[i].startCard(allCardFaces[start+i], i);
-            tempSetOfCards[i].transform.position = new Vector3(-4.11f, 0.0f, 0.0f);
+            tempSetOfCards[i].transform.position = deckLocation;
         }
         return tempSetOfCards;
+    }
+
+    void Awake()
+    {
+        deckLocation = positioner.transform.position;
     }
 }
