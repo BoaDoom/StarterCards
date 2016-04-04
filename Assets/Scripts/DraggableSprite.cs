@@ -4,83 +4,88 @@ using UnityEngine.EventSystems;
 
 public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
-    private Transform cardTransform;
+    private Vector3 cardVector3;
     public AnimationCurve growingCurve;
-    public float duration = 0.01f;
-    float zoomSize = 80f;
+    public float duration = 0.5f;
+    //float zoomSize = 5f;
     float zoom = 0f;
 
     private Vector3 screenPointOld;
     private Vector3 screenPointNew;
     private Vector3 offset;
 
+    float time;
+
     void OnMouseDown()
     {
-        GrowCard(zoomSize);
+        StopCoroutine(GrowCard(1));
+        StartCoroutine(GrowCard(1));
     }
     void OnMouseUp()
     {
-        GrowCard(zoomSize);
+        StopCoroutine(GrowCard(-1));
+        StartCoroutine(GrowCard(-1));
     }
-
     public void OnBeginDrag(PointerEventData eventData)
     {
-
-        Debug.Log("OnBeginDrag");
-        screenPointNew = Camera.main.WorldToScreenPoint(gameObject.transform.position);
+        screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
         offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPointNew.z));
-        
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPointNew.z);
-        //GrowCard(zoomSize);
-        //curScreenPoint.z -= zoom;
-        Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
-        transform.position = curPosition;
-
+        StopCoroutine(MoveCard());
+        StartCoroutine(MoveCard());
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("OnEndDrag");
-
-        
-        Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPointNew.z);
-        Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
-        transform.position = curPosition;
-    }
-
-    public void SizeTest(float testZoom)
-    {
-        zoom = testZoom;
+        StopCoroutine(MoveCard());
+        StartCoroutine(MoveCard());
     }
 
 
-    public void GrowCard(float Tzoom)
+    IEnumerator GrowCard(int click)
     {
-        StopCoroutine(selectionZoom(Tzoom));
-        StartCoroutine(selectionZoom(Tzoom));
-    }
-
-    IEnumerator selectionZoom(float Tzoom)
-    {
-        Vector3 screenLoc = Camera.main.WorldToScreenPoint(gameObject.transform.position);
+        float Tzoom = 100;
+        Vector3 screenLoc = Camera.main.WorldToScreenPoint(transform.position);
+        float start = screenLoc.z;
         float time = 0f;
-        while (time <= 1f)
+        while (time <= 1f )
         {
             float scale = growingCurve.Evaluate(time);
             time = time + (Time.deltaTime / duration);
-            screenLoc.z = screenLoc.z - ((scale * Tzoom)/ Tzoom);
-            //screenLoc.z = screenLoc.z - Tzoom;
-            gameObject.transform.position = Camera.main.ScreenToWorldPoint(screenLoc);
+            screenLoc.z = start - (click*(Tzoom * scale));
+            //if ((screenLoc.z) >= cardVector3.z)
+            //{
+            //    screenLoc.z = cardVector3.z;
+            //}
+            //if ((screenLoc.z) <= (cardVector3.z-Tzoom))
+            //{
+            //    screenLoc.z = cardVector3.z - Tzoom;
+            //}
+            transform.position = Camera.main.ScreenToWorldPoint(screenLoc);
             yield return new WaitForFixedUpdate();
         }
+    }
+    IEnumerator MoveCard()
+    {
+        Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, GetZCord());
+        Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
+        transform.position = curPosition;
+        yield return new WaitForFixedUpdate();
+    }
+
+    private float GetZCord()
+    {
+        screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
+        float zCord = screenPointNew.z;
+        return zCord;
     }
 
 
     void Awake()
     {
-        cardTransform = GetComponent<Transform>();
+        Transform cardTransform = GetComponent<Transform>();
+        cardVector3 = cardTransform.localPosition;
     }
 }

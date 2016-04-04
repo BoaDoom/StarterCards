@@ -24,7 +24,7 @@ public class PlayerDeckScript : MonoBehaviour {
         foreach (BaseCard card in setOfCards)
         {
             //
-            card.GetComponent<SpriteRenderer>().sortingOrder = deck.Count;  //setting sprite overlap/soring order
+            //card.GetComponent<SpriteRenderer>().sortingOrder = deck.Count;  //setting sprite overlap/soring order
             deck.Add(card);
             card.transform.Translate(playerStack);  //location moving
             //i++;
@@ -40,7 +40,7 @@ public class PlayerDeckScript : MonoBehaviour {
             cardsInPlay.Add(deck[randomInt]);
 
             cardsInPlay[i].transform.position = new Vector3(200+(15.0f * i), 50.0f, 0.0f);  //location moving
-            cardsInPlay[i].GetComponent<SpriteRenderer>().sortingOrder = cardsInPlay.Count;  //setting sprite overlap/soring order
+            //cardsInPlay[i].GetComponent<SpriteRenderer>().sortingOrder = cardsInPlay.Count;  //setting sprite overlap/soring order
             cardsInPlay[i].TurnOverCard();
 
             deck.RemoveAt(randomInt);
