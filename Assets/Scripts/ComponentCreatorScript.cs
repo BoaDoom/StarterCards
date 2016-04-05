@@ -11,6 +11,8 @@ public class ComponentCreatorScript : MonoBehaviour {
     public GameObject positioner;
     public Vector3 deckLocation;
 
+    public Canvas cardCanvas;
+
     public void takeComponentCode(int code)
     {
         List<BaseCard> tempSetOfCards = new List<BaseCard>();
@@ -36,13 +38,15 @@ public class ComponentCreatorScript : MonoBehaviour {
         {
             tempSetOfCards.Add(Instantiate(prefabCard));
             tempSetOfCards[i].startCard(allCardFaces[start+i], i);
+            tempSetOfCards[i].transform.SetParent(cardCanvas.transform, false);
             tempSetOfCards[i].transform.position = deckLocation;
+            
         }
         return tempSetOfCards;
     }
 
     void Awake()
     {
-        deckLocation = positioner.transform.position;
+        deckLocation =  positioner.transform.position;
     }
 }

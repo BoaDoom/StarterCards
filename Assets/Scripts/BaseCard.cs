@@ -6,6 +6,7 @@ public class BaseCard : MonoBehaviour {
 
     Sprite face;
     public Sprite backOfCard;
+    Canvas cardCanvas;
 
     bool faceOfCard;
 
@@ -39,6 +40,7 @@ public class BaseCard : MonoBehaviour {
         spriteRenderer = GetComponent<SpriteRenderer>();
         faceOfCard = false;
         spriteRenderer.sprite = backOfCard;
+        
     }
     
 	

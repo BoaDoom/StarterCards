@@ -18,6 +18,7 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     void OnMouseDown()
     {
+        startZlocation();
         StopCoroutine(GrowCard(1));
         StartCoroutine(GrowCard(1));
     }
@@ -46,23 +47,24 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     IEnumerator GrowCard(int click)
     {
-        float Tzoom = 100;
-        Vector3 screenLoc = Camera.main.WorldToScreenPoint(transform.position);
-        float start = screenLoc.z;
+        float Tzoom = 30;
+        Vector3 startLoc = Camera.main.WorldToScreenPoint(cardVector3);
+        float start = startLoc.z;
+        Vector3 screenLoc = startLoc;
         float time = 0f;
         while (time <= 1f )
         {
             float scale = growingCurve.Evaluate(time);
             time = time + (Time.deltaTime / duration);
             screenLoc.z = start - (click*(Tzoom * scale));
-            //if ((screenLoc.z) >= cardVector3.z)
-            //{
-            //    screenLoc.z = cardVector3.z;
-            //}
-            //if ((screenLoc.z) <= (cardVector3.z-Tzoom))
-            //{
-            //    screenLoc.z = cardVector3.z - Tzoom;
-            //}
+            if ((screenLoc.z) > startLoc.z)
+            {
+                screenLoc.z = startLoc.z;
+            }
+            if ((screenLoc.z) < startLoc.z - Tzoom)
+            {
+                screenLoc.z = startLoc.z - Tzoom;
+            }
             transform.position = Camera.main.ScreenToWorldPoint(screenLoc);
             yield return new WaitForFixedUpdate();
         }
@@ -81,11 +83,14 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         float zCord = screenPointNew.z;
         return zCord;
     }
-
+    void startZlocation()
+    {
+        Transform cardTransform = GetComponent<Transform>();
+        cardVector3 = Camera.main.WorldToScreenPoint(cardTransform.localPosition);
+    }
 
     void Awake()
     {
-        Transform cardTransform = GetComponent<Transform>();
-        cardVector3 = cardTransform.localPosition;
+
     }
 }
