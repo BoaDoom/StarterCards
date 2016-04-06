@@ -81,6 +81,7 @@
     <Compile Include="Assets\Scripts\New Folder\Deck.cs" />
     <Compile Include="Assets\Scripts\New Folder\DeckView.cs" />
     <Compile Include="Assets\Scripts\PlayerDeckScript.cs" />
+    <Compile Include="Assets\Scripts\SpriteWobble.cs" />
     <Compile Include="Assets\Scripts\healthBar\DebugDamage.cs" />
     <Compile Include="Assets\Scripts\healthBar\HealthBar.cs" />
     <Compile Include="Assets\Scripts\healthBar\HealthBarMovement.cs" />

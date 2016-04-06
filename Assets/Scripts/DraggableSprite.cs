@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 
 public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
+
     //private Vector3 cardVector3;
     public AnimationCurve growingCurve;
     public float duration = 0.5f;
@@ -105,6 +106,7 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     //        yield return new WaitForFixedUpdate();
     //}
 
+
     IEnumerator MoveCard()
     {
         Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, GetCurrentScreenCord().z);
@@ -122,9 +124,9 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     //{
     //    cardVector3 = GetCurrentScreenCord();
     //}
-
-    void Awake()
+    void Update()
     {
 
     }
+
 }
