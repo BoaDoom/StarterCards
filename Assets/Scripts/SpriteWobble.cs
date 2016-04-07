@@ -6,83 +6,99 @@ public class SpriteWobble : MonoBehaviour, IBeginDragHandler, IEndDragHandler, I
 {
 
     Transform spriteTransform;
+    bool cardWobbleOn;
 
-    Vector3 rotationOfCard;
+    float speedInputX;
+    float speedInputY;
 
     float mouseCursorSpeedX;
     float mouseCursorSpeedY;
 
+    float mouseCursorSpeedX1;
+    float mouseCursorSpeedY1;
+    float mouseCursorSpeedX2;
+    float mouseCursorSpeedY2;
+    float mouseCursorSpeedX3;
+    float mouseCursorSpeedY3;
+
     float spriteRotationX;
     float spriteRotationY;
 
+
     public void OnBeginDrag(PointerEventData eventData)
     {
+        cardWobbleOn = true;
         Debug.Log("OnBeginDrag");
     }
     public void OnDrag(PointerEventData eventData)
     {
         Debug.Log("OnDrag");
-
-        StopCoroutine(Wobble());
-        StartCoroutine(Wobble());
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+        cardWobbleOn = false;
         Debug.Log("OnEndDrag");
     }
 
 
 
-    IEnumerator Wobble()
+    //IEnumerator Wobble()
+    //{
+    //    AverageAngle(mouseCursorSpeedX, mouseCursorSpeedY)
+
+    //    float spriteRotationX = (mouseCursorSpeedX1 + mouseCursorSpeedX2 + mouseCursorSpeedX3) / 3;
+    //    float spriteRotationY = (mouseCursorSpeedY1 + mouseCursorSpeedY2 + mouseCursorSpeedY3) / 3;
+
+    //     = mouseCursorSpeedYP;
+    //     = mouseCursorSpeedXP;
+
+    //    spriteTransform.eulerAngles = new Vector3(spriteRotationX, spriteRotationY, 0f);
+
+    //    yield return new WaitForEndOfFrame();
+    //}
+    IEnumerator Wobble(float startx, float starty)
     {
-        float maxAngle = 0.2f;
-        spriteRotationX = spriteTransform.localRotation.x;
-        spriteRotationY = spriteTransform.localRotation.y;
-        mouseCursorSpeedX = Input.GetAxis("Mouse X") / Time.deltaTime;
-        mouseCursorSpeedY = Input.GetAxis("Mouse Y") / Time.deltaTime;
-        if (spriteRotationX > maxAngle)
-        {
-            mouseCursorSpeedX = 0;
-        }
-        if (spriteRotationY > maxAngle)
-        {
-            mouseCursorSpeedY = 0;
-        }
-        if (spriteRotationX < -maxAngle)
-        {
-            mouseCursorSpeedX = 0;
-        }
-        if (spriteRotationY < -maxAngle)
-        {
-            mouseCursorSpeedY = 0;
-        }
-        rotationOfCard.x = mouseCursorSpeedY;
-        rotationOfCard.y = mouseCursorSpeedX;
-        
-        spriteTransform.Rotate(rotationOfCard, Space.Self);
+        mouseCursorSpeedX3 = mouseCursorSpeedX2;
+        mouseCursorSpeedY3 = mouseCursorSpeedY2;
+        mouseCursorSpeedX2 = mouseCursorSpeedX1;
+        mouseCursorSpeedY2 = mouseCursorSpeedY1;
+        mouseCursorSpeedX1 = startx;
+        mouseCursorSpeedY1 = starty;
         yield return new WaitForEndOfFrame();
     }
 
-    void rotateTheCard(float Xinput, float Yinput)
-    {
-        spriteTransform.Rotate(rotationOfCard);
-    }
 
     void Update () {
-        if (mouseCursorSpeedX < 0)
-        {
+        mouseCursorSpeedX = Input.GetAxis("Mouse X") / Time.deltaTime;
+        mouseCursorSpeedY = Input.GetAxis("Mouse Y") / Time.deltaTime;
 
-        }
-        else if(mouseCursorSpeedY < 0)
-        {
+        float spriteRotationX = (mouseCursorSpeedX1 + mouseCursorSpeedX2 + mouseCursorSpeedX3) / 3;
+        float spriteRotationY = (mouseCursorSpeedY1 + mouseCursorSpeedY2 + mouseCursorSpeedY3) / 3;
 
+        spriteTransform.eulerAngles = new Vector3(spriteRotationY, spriteRotationX, 0f);
+        if (cardWobbleOn)
+        {
+            speedInputX = mouseCursorSpeedX;
+            speedInputY = mouseCursorSpeedY;
         }
-        
-        
+        else
+        {
+            speedInputX = 0;
+            speedInputY = 0;
+        }
+        StopCoroutine(Wobble(speedInputX, speedInputY));
+        StartCoroutine(Wobble(speedInputX, speedInputY));
     }
     void Awake()
     {
         spriteTransform = GetComponent<Transform>();
-        rotationOfCard = new Vector3(0f,0f,0f);
+        cardWobbleOn = false;
+        mouseCursorSpeedX1 = 0.01f;
+        mouseCursorSpeedY1 = 0.01f;
+        mouseCursorSpeedX2 = 0.01f;
+        mouseCursorSpeedY2 = 0.01f;
+        mouseCursorSpeedX3 = 0.01f;
+        mouseCursorSpeedY3 = 0.01f;
+
     }
 }
