@@ -8,7 +8,8 @@ public class ComponentCreatorScript : MonoBehaviour {
     public PlayerDeckScript Player1Deck;
     public BaseCard prefabCard;
 
-    public GameObject positioner;
+    //public GameObject positioner;
+    public Transform PlayerHandPanel;
     public Vector3 deckLocation;
 
     public Canvas cardCanvas;
@@ -38,9 +39,9 @@ public class ComponentCreatorScript : MonoBehaviour {
         {
             tempSetOfCards.Add(Instantiate(prefabCard));
             tempSetOfCards[i].startCard(allCardFaces[start+i], i);
-            tempSetOfCards[i].transform.SetParent(cardCanvas.transform, false);
-            tempSetOfCards[i].transform.position = positioner.transform.position;
-
+            tempSetOfCards[i].transform.SetParent(PlayerHandPanel, false);
+            //tempSetOfCards[i].transform.position = positioner.transform.position;
+            tempSetOfCards[i].GetComponent<SpriteRenderer>().sortingOrder = 1;
 
         }
         return tempSetOfCards;
@@ -48,6 +49,6 @@ public class ComponentCreatorScript : MonoBehaviour {
 
     void Awake()
     {
-        deckLocation = positioner.transform.position;
+        //deckLocation = positioner.transform.position;
     }
 }

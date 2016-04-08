@@ -2,8 +2,26 @@
 using System.Collections;
 using UnityEngine.EventSystems;
 
-public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
+public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
+    Transform spriteTransform;
+    bool cardWobbleOn;
+
+    float speedInputX;
+    float speedInputY;
+
+    float mouseCursorSpeedX;
+    float mouseCursorSpeedY;
+
+    float mouseCursorSpeedX1;
+    float mouseCursorSpeedY1;
+    float mouseCursorSpeedX2;
+    float mouseCursorSpeedY2;
+    float mouseCursorSpeedX3;
+    float mouseCursorSpeedY3;
+
+    float spriteRotationX;
+    float spriteRotationY;
 
     //private Vector3 cardVector3;
     public AnimationCurve growingCurve;
@@ -19,17 +37,30 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     void OnMouseDown()
     {
-        //startZlocation();
-        StopCoroutine(GrowCard(1));
-        StartCoroutine(GrowCard(1));
+        cardWobbleOn = true;
     }
     void OnMouseUp()
     {
+        cardWobbleOn = false;
+    }
+
+
+    void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
+    {
+        //startZlocation();
+        
+        StopCoroutine(GrowCard(1));
+        StartCoroutine(GrowCard(1));
+    }
+    void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
+    {
+        
         StopCoroutine(GrowCard(-1));
         StartCoroutine(GrowCard(-1));
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+
         screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
         offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPointNew.z));
     }
@@ -46,30 +77,7 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     }
 
 
-    //IEnumerator GrowCard(int click)
-    //{
-    //    float Tzoom = 30;
-    //    Vector3 startLoc = Camera.main.WorldToScreenPoint(cardVector3);
-    //    float startZ = startLoc.z;
-    //    Vector3 creenLoc = startLoc;
-    //    float time = 0f;
-    //    while (time <= 1f)
-    //    {
-    //        float scale = growingCurve.Evaluate(time);
-    //        time = time + (Time.deltaTime / duration);
-    //        creenLoc.z = startZ - (click * (Tzoom * scale));
-    //        if ((creenLoc.z) > startLoc.z)
-    //        {
-    //            creenLoc.z = startLoc.z;
-    //        }
-    //        if ((creenLoc.z) < startLoc.z - Tzoom)
-    //        {
-    //            creenLoc.z = startLoc.z - Tzoom;
-    //        }
-    //        transform.position = Camera.main.ScreenToWorldPoint(creenLoc);
-    //        yield return new WaitForFixedUpdate();
-    //    }
-    //}
+    
     IEnumerator GrowCard(int click)
     {
         float Tzoom = 30;
@@ -94,18 +102,6 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
             yield return new WaitForEndOfFrame();
         }
     }
-    //IEnumerator GrowCard(int click)
-    //{
-    //    float Tzoom = 30;
-    //    Vector3 startLoc = cardVector3;
-    //    Vector3 creenLoc = startLoc;
-    //    float startZ = startLoc.z;
-
-    //        creenLoc.z = startZ - (click * (Tzoom));
-    //        transform.localPosition = creenLoc;
-    //        yield return new WaitForFixedUpdate();
-    //}
-
 
     IEnumerator MoveCard()
     {
@@ -120,12 +116,50 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
         return screenPointNew;
     }
-    //void startZlocation()
-    //{
-    //    cardVector3 = GetCurrentScreenCord();
-    //}
+    IEnumerator Wobble(float startx, float starty)
+    {
+        mouseCursorSpeedX3 = mouseCursorSpeedX2;
+        mouseCursorSpeedY3 = mouseCursorSpeedY2;
+        mouseCursorSpeedX2 = mouseCursorSpeedX1;
+        mouseCursorSpeedY2 = mouseCursorSpeedY1;
+        mouseCursorSpeedX1 = startx;
+        mouseCursorSpeedY1 = starty;
+        yield return new WaitForEndOfFrame();
+    }
+
+
     void Update()
     {
+        mouseCursorSpeedX = Input.GetAxis("Mouse X") / Time.deltaTime;
+        mouseCursorSpeedY = Input.GetAxis("Mouse Y") / Time.deltaTime;
+
+        float spriteRotationX = (mouseCursorSpeedX1 + mouseCursorSpeedX2 + mouseCursorSpeedX3) / 3;
+        float spriteRotationY = (mouseCursorSpeedY1 + mouseCursorSpeedY2 + mouseCursorSpeedY3) / 3;
+
+        spriteTransform.eulerAngles = new Vector3(spriteRotationY, spriteRotationX, 0f);
+        if (cardWobbleOn)
+        {
+            speedInputX = mouseCursorSpeedX;
+            speedInputY = mouseCursorSpeedY;
+        }
+        else
+        {
+            speedInputX = 0;
+            speedInputY = 0;
+        }
+        StopCoroutine(Wobble(speedInputX, speedInputY));
+        StartCoroutine(Wobble(speedInputX, speedInputY));
+    }
+    void Awake()
+    {
+        spriteTransform = GetComponent<Transform>();
+        cardWobbleOn = false;
+        mouseCursorSpeedX1 = 0.01f;
+        mouseCursorSpeedY1 = 0.01f;
+        mouseCursorSpeedX2 = 0.01f;
+        mouseCursorSpeedY2 = 0.01f;
+        mouseCursorSpeedX3 = 0.01f;
+        mouseCursorSpeedY3 = 0.01f;
 
     }
 
