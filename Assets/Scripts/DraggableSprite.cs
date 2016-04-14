@@ -4,8 +4,17 @@ using UnityEngine.EventSystems;
 
 public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
+    float Tzoom = 15;
+    float startLoc = 100; //Y location of the canvas its located on
+
+    float minZoom;
+    float maxZoom;
+
     Transform spriteTransform;
     bool cardWobbleOn;
+    bool pointerLock = false;
+
+    float newZCord;
 
     float speedInputX;
     float speedInputY;
@@ -29,34 +38,46 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     //float zoomSize = 5f;
     float zoom = 0f;
 
-    private Vector3 screenPointOld;
     private Vector3 screenPointNew;
     private Vector3 offset;
+
 
     float time;
 
     void OnMouseDown()
     {
+        pointerLock = true;
         cardWobbleOn = true;
+        StopCoroutine(ClickGrowCard(1));
+        StartCoroutine(ClickGrowCard(1));
     }
     void OnMouseUp()
     {
+        pointerLock = false;
         cardWobbleOn = false;
+        StopCoroutine(ClickGrowCard(-1));
+        StartCoroutine(ClickGrowCard(-1));
+        StopCoroutine(HoverGrowCard(-1));
+        StartCoroutine(HoverGrowCard(-1));
     }
 
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
-        //startZlocation();
-        
-        StopCoroutine(GrowCard(1));
-        StartCoroutine(GrowCard(1));
+        if (!pointerLock)
+        {
+            StopCoroutine(HoverGrowCard(1));
+            StartCoroutine(HoverGrowCard(1));
+        }
+
     }
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
-        
-        StopCoroutine(GrowCard(-1));
-        StartCoroutine(GrowCard(-1));
+        if (!pointerLock)
+        {
+            StopCoroutine(HoverGrowCard(-1));
+            StartCoroutine(HoverGrowCard(-1));
+        }
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -78,28 +99,61 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
 
     
-    IEnumerator GrowCard(int click)
+    IEnumerator HoverGrowCard(int click)
     {
-        float Tzoom = 30;
-        Vector3 screenLoc = GetCurrentScreenCord();
-        Vector3 startLoc = Camera.main.ScreenToWorldPoint(transform.parent.position);
-        float start = screenLoc.z;
+
+        float start = newZCord;
         float time = 0f;
         while (time <= 1f)
         {
             float scale = growingCurve.Evaluate(time);
             time = time + (Time.deltaTime / duration);
-            screenLoc.z = start - (click * (Tzoom * scale));
-            if ((screenLoc.z) > startLoc.z)
+            newZCord = start - (click * (Tzoom * scale));
+
+            if (newZCord > minZoom)
             {
-                screenLoc.z = startLoc.z;
+                newZCord = minZoom;
             }
-            if ((screenLoc.z) < (startLoc.z - Tzoom))
+            if (newZCord < maxZoom)
             {
-                screenLoc.z = startLoc.z - (Tzoom);
+                newZCord = maxZoom;
             }
-            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, screenLoc.z));
+
+            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
             yield return new WaitForEndOfFrame();
+        }
+
+    }
+    IEnumerator ClickGrowCard(int click)
+    {
+        if (click > 0)
+        {
+            minZoom -= (Tzoom * click);
+            maxZoom -= (Tzoom * click);
+        }
+        float start = newZCord;
+        float time = 0f;
+        while (time <= 1f)
+        {
+            float scale = growingCurve.Evaluate(time);
+            time = time + (Time.deltaTime / duration);
+            newZCord = start - (click * (Tzoom * scale));
+
+            if (newZCord > minZoom)
+            {
+                newZCord = minZoom;
+            }
+            if (newZCord < maxZoom)
+            {
+                newZCord = maxZoom;
+            }
+            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
+            yield return new WaitForEndOfFrame();
+        }
+        if (click < 0)
+        {
+            minZoom -= (Tzoom * click);
+            maxZoom -= (Tzoom * click);
         }
     }
 
@@ -136,6 +190,8 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         float spriteRotationX = (mouseCursorSpeedX1 + mouseCursorSpeedX2 + mouseCursorSpeedX3) / 3;
         float spriteRotationY = (mouseCursorSpeedY1 + mouseCursorSpeedY2 + mouseCursorSpeedY3) / 3;
 
+        
+
         spriteTransform.eulerAngles = new Vector3(spriteRotationY, spriteRotationX, 0f);
         if (cardWobbleOn)
         {
@@ -152,6 +208,12 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     }
     void Awake()
     {
+        minZoom = startLoc;
+        maxZoom = startLoc - Tzoom;
+
+        newZCord = GetCurrentScreenCord().z;
+
+
         spriteTransform = GetComponent<Transform>();
         cardWobbleOn = false;
         mouseCursorSpeedX1 = 0.01f;
