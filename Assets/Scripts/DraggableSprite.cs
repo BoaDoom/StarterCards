@@ -5,14 +5,14 @@ using UnityEngine.EventSystems;
 public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     float Tzoom = 15;
-    float startLoc = 100; //Y location of the canvas its located on
+    float startLoc = 100; //Z location of the canvas its located on
 
     float minZoom;
     float maxZoom;
 
     Transform spriteTransform;
     bool cardWobbleOn;
-    bool pointerLock = false;
+    bool pointerLock;
 
     float newZCord;
 
@@ -32,10 +32,8 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     float spriteRotationX;
     float spriteRotationY;
 
-    //private Vector3 cardVector3;
     public AnimationCurve growingCurve;
     public float duration = 0.5f;
-    //float zoomSize = 5f;
     float zoom = 0f;
 
     private Vector3 screenPointNew;
@@ -96,8 +94,6 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         StopCoroutine(MoveCard());
         StartCoroutine(MoveCard());
     }
-
-
     
     IEnumerator HoverGrowCard(int click)
     {
@@ -165,11 +161,7 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         yield return new WaitForFixedUpdate();
     }
 
-    private Vector3 GetCurrentScreenCord()
-    {
-        screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
-        return screenPointNew;
-    }
+
     IEnumerator Wobble(float startx, float starty)
     {
         mouseCursorSpeedX3 = mouseCursorSpeedX2;
@@ -181,6 +173,11 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         yield return new WaitForEndOfFrame();
     }
 
+    private Vector3 GetCurrentScreenCord()
+    {
+        screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
+        return screenPointNew;
+    }
 
     void Update()
     {
@@ -189,8 +186,6 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
         float spriteRotationX = (mouseCursorSpeedX1 + mouseCursorSpeedX2 + mouseCursorSpeedX3) / 3;
         float spriteRotationY = (mouseCursorSpeedY1 + mouseCursorSpeedY2 + mouseCursorSpeedY3) / 3;
-
-        
 
         spriteTransform.eulerAngles = new Vector3(spriteRotationY, spriteRotationX, 0f);
         if (cardWobbleOn)
@@ -213,9 +208,10 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
         newZCord = GetCurrentScreenCord().z;
 
-
         spriteTransform = GetComponent<Transform>();
         cardWobbleOn = false;
+        pointerLock = false;
+
         mouseCursorSpeedX1 = 0.01f;
         mouseCursorSpeedY1 = 0.01f;
         mouseCursorSpeedX2 = 0.01f;
