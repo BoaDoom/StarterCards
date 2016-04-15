@@ -4,6 +4,9 @@ using UnityEngine.EventSystems;
 
 public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
+    Transform originParent = null;
+    Vector3 originLocalPosition;
+
     float Tzoom = 15;
     float startLoc = 100; //Z location of the canvas its located on
 
@@ -36,14 +39,20 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     public float duration = 0.5f;
     float zoom = 0f;
 
+    //Canvas parentCanvas;
+
     private Vector3 screenPointNew;
     private Vector3 offset;
-
 
     float time;
 
     void OnMouseDown()
     {
+        originParent = this.transform.parent;
+        originLocalPosition = this.transform.localPosition;
+        this.transform.SetParent(this.transform.parent.parent, true);
+        //parentCanvas = this.transform.GetComponentInParent<Canvas>();
+
         pointerLock = true;
         cardWobbleOn = true;
         StopCoroutine(ClickGrowCard(1));
@@ -53,15 +62,22 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     {
         pointerLock = false;
         cardWobbleOn = false;
+
+        //StopCoroutine(HoverGrowCard(-1));
+        //StartCoroutine(HoverGrowCard(-1));
         StopCoroutine(ClickGrowCard(-1));
         StartCoroutine(ClickGrowCard(-1));
-        StopCoroutine(HoverGrowCard(-1));
-        StartCoroutine(HoverGrowCard(-1));
+
+        this.transform.SetParent(originParent, true);
+
+        //this.transform.localPosition = originLocalPosition;
+
     }
 
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
+
         if (!pointerLock)
         {
             StopCoroutine(HoverGrowCard(1));
@@ -79,9 +95,16 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        //GetComponent<CanvasGroup>().blocksRaycasts = false;
+
+        //originParent = this.transform.parent;
+        //this.transform.SetParent(this.transform.parent.parent);
+        //
 
         screenPointNew = Camera.main.WorldToScreenPoint(transform.position);
         offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPointNew.z));
+
+        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -91,66 +114,75 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        StopCoroutine(MoveCard());
-        StartCoroutine(MoveCard());
+        //GetComponent<CanvasGroup>().blocksRaycasts = true;
+        //StopCoroutine(MoveCard());
+        //StartCoroutine(MoveCard());
+        //this.transform.SetParent(originParent);
     }
-    
+
     IEnumerator HoverGrowCard(int click)
     {
-
-        float start = newZCord;
-        float time = 0f;
-        while (time <= 1f)
-        {
-            float scale = growingCurve.Evaluate(time);
-            time = time + (Time.deltaTime / duration);
-            newZCord = start - (click * (Tzoom * scale));
-
-            if (newZCord > minZoom)
+            float start = newZCord;
+            float time = 0f;
+            while (time <= 1f)
             {
-                newZCord = minZoom;
-            }
-            if (newZCord < maxZoom)
-            {
-                newZCord = maxZoom;
-            }
+                float scale = growingCurve.Evaluate(time);
+                time = time + (Time.deltaTime / duration);
+                newZCord = start - (click * (Tzoom * scale));
 
-            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
-            yield return new WaitForEndOfFrame();
-        }
+                if (newZCord > minZoom)
+                {
+                    newZCord = minZoom;
+                }
+                if (newZCord < maxZoom)
+                {
+                    newZCord = maxZoom;
+                }
 
+                transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
+                yield return new WaitForEndOfFrame();
+            }
+        //if (click < 0)
+        //{
+        //    this.transform.SetParent(originParent);
+        //}
     }
     IEnumerator ClickGrowCard(int click)
     {
-        if (click > 0)
-        {
+
+            if (click > 0)
+            {
+                //originParent = this.transform.parent;
+                //this.transform.SetParent(this.transform.parent.parent);
+            }
             minZoom -= (Tzoom * click);
             maxZoom -= (Tzoom * click);
-        }
-        float start = newZCord;
-        float time = 0f;
-        while (time <= 1f)
-        {
-            float scale = growingCurve.Evaluate(time);
-            time = time + (Time.deltaTime / duration);
-            newZCord = start - (click * (Tzoom * scale));
+            float start = newZCord;
+            float time = 0f;
+            while (time <= 1f)
+            {
+                float scale = growingCurve.Evaluate(time);
+                time = time + (Time.deltaTime / duration);
+                newZCord = start - (click * (Tzoom * scale));
 
-            if (newZCord > minZoom)
-            {
-                newZCord = minZoom;
-            }
-            if (newZCord < maxZoom)
-            {
-                newZCord = maxZoom;
-            }
-            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
+                if (newZCord > minZoom)
+                {
+                    newZCord = minZoom;
+                }
+                if (newZCord < maxZoom)
+                {
+                    newZCord = maxZoom;
+                }
+                transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
             yield return new WaitForEndOfFrame();
         }
         if (click < 0)
         {
-            minZoom -= (Tzoom * click);
-            maxZoom -= (Tzoom * click);
+
+            //this.transform.SetParent(originParent);
+
         }
+
     }
 
     IEnumerator MoveCard()
