@@ -37,10 +37,9 @@ public class ComponentCreatorScript : MonoBehaviour {
         List<BaseCard> tempSetOfCards = new List<BaseCard>();
         for (int i=0; i < count; i++)
         {
-            tempSetOfCards.Add(Instantiate(prefabCard));
+            tempSetOfCards.Add(Instantiate(prefabCard));        //making the cards
             tempSetOfCards[i].startCard(allCardFaces[start+i], i);
-            tempSetOfCards[i].transform.SetParent(PlayerHandPanel, false);
-            //tempSetOfCards[i].transform.position = positioner.transform.position;
+            tempSetOfCards[i].transform.SetParent(PlayerHandPanel, false);      //placing the card onto the GUI object panel PlayerHandPanel
             tempSetOfCards[i].GetComponent<SpriteRenderer>().sortingOrder = 1;
 
         }
