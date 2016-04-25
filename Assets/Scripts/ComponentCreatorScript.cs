@@ -40,6 +40,7 @@ public class ComponentCreatorScript : MonoBehaviour {
             tempSetOfCards.Add(Instantiate(prefabCard));        //making the cards
             tempSetOfCards[i].startCard(allCardFaces[start+i], i);
             tempSetOfCards[i].transform.SetParent(PlayerHandPanel, false);      //placing the card onto the GUI object panel PlayerHandPanel
+            tempSetOfCards[i].transform.GetChild(0).SetParent(PlayerHandPanel, false);      //placing the card's only child, its positioning object, back into the PlayerHandPanel
             tempSetOfCards[i].GetComponent<SpriteRenderer>().sortingOrder = 1;
 
         }

@@ -48,10 +48,6 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     void OnMouseDown()
     {
-        originParent = this.transform.parent;
-        originLocalPosition = this.transform.localPosition;
-        this.transform.SetParent(this.transform.parent.parent, true);
-        //parentCanvas = this.transform.GetComponentInParent<Canvas>();
 
         pointerLock = true;
         cardWobbleOn = true;
@@ -68,7 +64,6 @@ public class DraggableSprite : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         StopCoroutine(ClickGrowCard(-1));
         StartCoroutine(ClickGrowCard(-1));
 
-        this.transform.SetParent(originParent, true);
 
         //this.transform.localPosition = originLocalPosition;
 
