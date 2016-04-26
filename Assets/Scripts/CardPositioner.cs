@@ -8,7 +8,7 @@ public class CardPositioner : MonoBehaviour {
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        //spriteRenderer.enabled = !spriteRenderer.enabled;
+        spriteRenderer.enabled = !spriteRenderer.enabled;
 
     }
 
