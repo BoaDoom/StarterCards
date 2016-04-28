@@ -9,7 +9,7 @@ public class ComponentCreatorScript : MonoBehaviour {
     public BaseCard prefabCard;
 
     //public GameObject positioner;
-    public Transform PlayerHandPanel;
+    public PlayerHandPositioner PlayerHandPositioner;
     public Vector3 deckLocation;
 
     public Canvas cardCanvas;
@@ -34,15 +34,17 @@ public class ComponentCreatorScript : MonoBehaviour {
 
     public List<BaseCard> AddCardLoop(int start, int count)
     {
+        
         List<BaseCard> tempSetOfCards = new List<BaseCard>();
         for (int i=0; i < count; i++)
         {
             tempSetOfCards.Add(Instantiate(prefabCard));        //making the cards
-            tempSetOfCards[i].startCard(allCardFaces[start+i], i);
-            tempSetOfCards[i].transform.SetParent(PlayerHandPanel, false);      //placing the card onto the GUI object panel PlayerHandPanel
-            tempSetOfCards[i].transform.GetChild(0).SetParent(PlayerHandPanel, false);      //placing the card's only child, its positioning object, back into the PlayerHandPanel
-            tempSetOfCards[i].GetComponent<SpriteRenderer>().sortingOrder = 1;
+            tempSetOfCards[i].transform.SetParent(PlayerHandPositioner.transform, false);      //placing the card onto the GUI object panel PlayerHandPanel
+            tempSetOfCards[i].startCard(allCardFaces[start + i], i);
 
+            BaseCard tempSingleCard = tempSetOfCards[i];
+            PlayerHandPositioner.TakeCard(tempSingleCard);
+            
         }
         return tempSetOfCards;
     }

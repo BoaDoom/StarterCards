@@ -16,7 +16,10 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
     float maxZoom;
 
     Transform spriteTransform;
-    //bool cardWobbleOn;
+    bool cardReleased;
+    bool CardMoved;
+    int parentChildren;
+    Transform lastOriginParent;
     //bool pointerLock = false;
 
     //float newZCord;
@@ -69,27 +72,27 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
     {
         face = assignFace;
         damage = assignDamage;
-
-
-
+        lastOriginParent = this.transform.parent;
+        parentChildren = this.transform.parent.childCount;
+        UpdatePosition();
     }
     
     void OnMouseDown()
     {
+        parentChildren = this.transform.parent.childCount;
+        Debug.Log("OnMouseDown");
         cardClicked = true;
-
         StopCoroutine(ClickGrowCard());
         StartCoroutine(ClickGrowCard());
     }
     void OnMouseUp()
     {
+        Debug.Log("OnMouseUp");
         cardClicked = false;
+        cardHovered = false;
+        cardReleased = true;
+        //StopCoroutine(ClickGrowCard());
 
-        StopCoroutine(GoToLayoutPosition());      //setting the card towards its sorted location
-        StartCoroutine(GoToLayoutPosition());
-
-        //StopCoroutine(HoverGrowCard(-1));
-        //StartCoroutine(HoverGrowCard(-1));
         StopCoroutine(ClickShrinkCard());
         StartCoroutine(ClickShrinkCard());
 
@@ -97,7 +100,10 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
-
+        Debug.Log("OnHoverEnter");
+        //StopCoroutine(HoverGrowCard());
+        //StopCoroutine(HoverShrinkCard());
+        cardHovered = true;
         if (!cardClicked)
         {
             StopCoroutine(HoverGrowCard());
@@ -107,6 +113,9 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
     }
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
+        Debug.Log("OnHoverExit");
+        //StopCoroutine(HoverShrinkCard());
+        //StopCoroutine(HoverGrowCard());
         if (!cardClicked)
         {
             StopCoroutine(HoverShrinkCard());
@@ -116,12 +125,19 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        //StopCoroutine(ClickShrinkCard());
+        //StopCoroutine(ClickGrowCard());
+        //StopCoroutine(HoverShrinkCard());
+        //StopCoroutine(HoverGrowCard());
+        //StopCoroutine(GoToLayoutPosition());
+        CardMoved = true;
         screenPointNew = Camera.main.WorldToScreenPoint(this.transform.position);
         offset = this.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPointNew.z));
 
-        originParent = this.transform.parent;             //saving the origin location of the card, the playerpanel
+
+        originParent = lastOriginParent = this.transform.parent;             //saving the origin location of the card, the playerpanel
         CardPosition.transform.SetParent(this.transform.parent.parent, true);     //setting the parent of the CardPositioner clone to the parent of this card
-        //this.transform.SetParent(this.transform.parent.parent, true);       //setting the parent of the card as the whole card canvas
+        this.transform.SetParent(this.transform.parent.parent, true);       //setting the parent of the card as the whole card canvas
 
 
     }
@@ -133,13 +149,18 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        //this.transform.SetParent(originParent, true);       //resetting the parent to the player panel
+        //StopCoroutine(MoveCard());
+        this.transform.SetParent(originParent, true);       //resetting the parent to the player panel
+        lastOriginParent = this.transform.parent;     
         CardPosition.transform.SetParent(originParent, true);       //resetting the parent to the player panel
 
 
     }
 
-
+    //int GetCardCount()
+    //{
+    //    return this.transform.parent.childCount;
+    //}
 
 
     public void TurnOverCard()
@@ -158,14 +179,16 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
 
     IEnumerator GoToLayoutPosition()
     {
+        //StopCoroutine(MoveCard());
+        Debug.Log("GoToLayoutPosition activated");
         float time = 0f;
         float TravelX = CardPosition.transform.position.x - this.transform.position.x;
         float TravelY = CardPosition.transform.position.y - this.transform.position.y;
-        float TravelZ = 0 - this.transform.position.y;
+        float TravelZ = CardPosition.transform.position.z - this.transform.position.z;
 
         float OriginX = this.transform.position.x;
         float OriginY = this.transform.position.y;
-        float OriginZ = startLoc;
+        float OriginZ = this.transform.position.z;
 
         while (time <= 1f)
         {
@@ -174,67 +197,83 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
             this.transform.position = new Vector3((OriginX+(TravelX* scale)), (OriginY + (TravelY * scale)), (OriginZ + (TravelZ * scale)));
             yield return new WaitForEndOfFrame();
         }
+        //this.transform.position = CardPosition.transform.position;
     }
 
     IEnumerator HoverGrowCard()
     {
-        float newZCord = startLoc;
         float time = 0f;
+        float newZCord;
+        float startingPosition = this.transform.position.z;
+        float distanceToTravel = levelOneZoom - this.transform.position.z;
         while (time <= 1f)
         {
             float scale = growingCurve.Evaluate(time);
             time = time + (Time.deltaTime / duration);
-            newZCord = startLoc - (Tzoom * scale);
+            newZCord = startingPosition + (distanceToTravel * scale);
             transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
             yield return new WaitForEndOfFrame();
         }
     }
     IEnumerator HoverShrinkCard()
     {
-        float newZCord = startLoc;
         float time = 0f;
+        float newZCord;
+        float startingPosition = this.transform.position.z;
+        float distanceToTravel = startLoc - this.transform.position.z;
         while (time <= 1f)
         {
             float scale = growingCurve.Evaluate(time);
             time = time + (Time.deltaTime / duration);
-            newZCord = startLoc + (Tzoom * scale);
+            newZCord = startingPosition + (distanceToTravel * scale);
             transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
             yield return new WaitForEndOfFrame();
         }
+        cardHovered = false;
     }
     IEnumerator ClickGrowCard()
     {
-        float newZCord = levelOneZoom;
         float time = 0f;
+        float newZCord;
+        float startingPosition = this.transform.position.z;
+        float distanceToTravel = levelTwoZoom - this.transform.position.z;
         while (time <= 1f)
         {
             float scale = growingCurve.Evaluate(time);
             time = time + (Time.deltaTime / duration);
-            newZCord = levelOneZoom - (Tzoom * scale);
+            newZCord = startingPosition + (distanceToTravel * scale);
             transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
             yield return new WaitForEndOfFrame();
         }
     }
     IEnumerator ClickShrinkCard()
     {
-        float newZCord = levelOneZoom;
-        float time = 0f;
-        while (time <= 1f)
-        {
-            float scale = growingCurve.Evaluate(time);
-            time = time + (Time.deltaTime / duration);
-            newZCord = levelOneZoom + (Tzoom * scale);
-            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
-            yield return new WaitForEndOfFrame();
+            float time = 0f;
+            float newZCord;
+            float startingPosition = this.transform.position.z;
+            float distanceToTravel = levelOneZoom - this.transform.position.z;
+            while (time <= 1f)
+            {
+                float scale = growingCurve.Evaluate(time);
+                time = time + (Time.deltaTime / duration);
+                newZCord = startingPosition + (distanceToTravel * scale);
+                transform.position = Camera.main.ScreenToWorldPoint(new Vector3(GetCurrentScreenCord().x, GetCurrentScreenCord().y, newZCord));
+                yield return new WaitForEndOfFrame();
+            }
         }
-    }
 
 
-    IEnumerator MoveCard()
+        IEnumerator MoveCard()
     {
+        StopCoroutine(ClickShrinkCard());
+        StopCoroutine(ClickGrowCard());
+        StopCoroutine(HoverShrinkCard());
+        StopCoroutine(HoverGrowCard());
+
         Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, GetCurrentScreenCord().z);
         Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
         this.transform.position = curPosition;
+
         yield return new WaitForFixedUpdate();
     }
 
@@ -256,15 +295,33 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
         return screenPointNew;
 
     }
+
+    public void UpdatePosition()
+    {
+        StopCoroutine(GoToLayoutPosition());      //setting the card towards its sorted location
+        StartCoroutine(GoToLayoutPosition());
+    }
+
+
     void Update()
     {
-        //if (!cardClicked)
-        //{
-        //    StopCoroutine(GoToLayoutPosition());      //setting the card towards its sorted location
-        //    StartCoroutine(GoToLayoutPosition());
-        //}
-        //change this so that it doesn't activate unless the card is released or that number of children of the parent set has changed, giving it a limited update window for effect
+        if (!cardClicked && !cardHovered && CardMoved)
+        {
+            StopCoroutine(ClickShrinkCard());
+            StopCoroutine(ClickGrowCard());
+            StopCoroutine(HoverShrinkCard());
+            StopCoroutine(HoverGrowCard());
+            StopCoroutine(MoveCard());
 
+            StopCoroutine(GoToLayoutPosition());      //setting the card towards its sorted location
+            StartCoroutine(GoToLayoutPosition());
+            CardMoved = false;
+        }
+        //if (parentChildren != lastOriginParent.childCount)
+        //{
+        //    UpdatePosition();
+        //    parentChildren = lastOriginParent.childCount;
+        //}
 
         mouseCursorSpeedX = Input.GetAxis("Mouse X") / Time.deltaTime;
         mouseCursorSpeedY = Input.GetAxis("Mouse Y") / Time.deltaTime;
@@ -296,8 +353,9 @@ public class BaseCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
         CardPosition.transform.SetParent(this.transform, false);     //sets parent to this instance of the card object, so that it can be found and set as a playerpanel child. Messy
 
         faceOfCard = false;
-        minZoom = startLoc;
-        maxZoom = startLoc - Tzoom;
+        cardReleased = false;
+        CardMoved = true;
+        
 
         levelOneZoom = startLoc - Tzoom;
         levelTwoZoom = startLoc - (Tzoom*2);
